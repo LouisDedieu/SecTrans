@@ -3,12 +3,27 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <signal.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+
+#define CLIENT_SERVER_PORT 9090
 
 #define MAX_SIZE 1024
 #define SERVER_PORT 8080
 #define FILE_DIRECTORY "fichiers/"
 
+void client_signal_handler(int signal) {
+    if (signal == SIGINT) {
+        stopserver();
+        printf("Client server stopped\n");
+        exit(0);
+    }
+}
+
 int main(int argc, char *argv[]) {
+    signal(SIGINT, client_signal_handler);
     char buffer[MAX_SIZE];
 
     if (argc < 2) {
@@ -44,8 +59,10 @@ int main(int argc, char *argv[]) {
 
         strcpy(buffer, "LIST");
         sndmsg(buffer, SERVER_PORT);
+        startserver(CLIENT_SERVER_PORT);
         getmsg(buffer);
         printf("Fichiers sur le serveur :\n%s\n", buffer);
+        stopserver();
 
     } else if (strcmp(argv[1], "-down") == 0 && argc == 3) {
 
