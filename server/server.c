@@ -33,12 +33,15 @@ int main() {
         if (getmsg(message) >= 0) {
             if (strncmp(message, "UP ", 3) == 0) {
                 char *filename = message + 3;
+                                char full_path[MAX_SIZE];
+                snprintf(full_path, sizeof(full_path), "%s%s", FILE_DIRECTORY, filename);
+                
                 empty_buffer(message);
                 getmsg(message);
 
-                char full_path[MAX_SIZE];
-                snprintf(full_path, sizeof(full_path), "%s%s", FILE_DIRECTORY, filename);
 
+                printf("\n");
+                printf(full_path);
                 FILE *file = fopen(full_path, "w");
                 if (file == NULL) {
                     printf("Erreur: Impossible de créer le fichier.\n");

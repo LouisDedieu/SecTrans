@@ -46,11 +46,24 @@ int main(int argc, char *argv[]) {
         fread(file_contents, file_size, 1, file);
         file_contents[file_size] = '\0';
 
-        snprintf(buffer, sizeof(buffer), "UP %s", argv[2]);
+        char *filename;
+
+        // Recherche du dernier '/' dans la chaîne.
+        filename = strrchr(argv[2], '/');
+
+        // Si un '/' est trouvé, avancer le pointeur pour ignorer le '/'.
+        if (filename != NULL) {
+            filename++;  // Passer au caractère suivant le '/'
+        } else {
+            // Si aucun '/' n'est trouvé, toute la chaîne est le nom du fichier.
+            filename = argv[2];
+        }
+        
+        snprintf(buffer, sizeof(buffer), "UP %s", filename);
         sndmsg(buffer, SERVER_PORT);
         sndmsg(file_contents, SERVER_PORT);
 
-        printf("Fichier %s envoyé au serveur.\n", argv[2]);
+        printf("Fichier %s envoyé au serveur.\n", filename);
 
         free(file_contents);
         fclose(file);

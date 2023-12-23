@@ -8,3 +8,4 @@ node_modules/   # Dépendances Node.js
 *.log           # Fichiers log
 *.tmp           # Fichiers temporaires
 *.tmp.*         # Autres formats de fichiers temporaires
+*/fichiers      # Dossiers de fichiers
