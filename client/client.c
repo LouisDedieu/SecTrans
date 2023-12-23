@@ -58,7 +58,7 @@ int main(int argc, char *argv[]) {
             // Si aucun '/' n'est trouvé, toute la chaîne est le nom du fichier.
             filename = argv[2];
         }
-        
+
         snprintf(buffer, sizeof(buffer), "UP %s", filename);
         sndmsg(buffer, SERVER_PORT);
         sndmsg(file_contents, SERVER_PORT);
@@ -68,7 +68,7 @@ int main(int argc, char *argv[]) {
         free(file_contents);
         fclose(file);
 
-    } else if (strcmp(argv[1], "-list") == 0) {
+    } else if (strcmp(argv[1], "-list") == 0 && argc == 2) {
 
         strcpy(buffer, "LIST");
         sndmsg(buffer, SERVER_PORT);

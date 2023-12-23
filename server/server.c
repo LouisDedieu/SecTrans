@@ -9,6 +9,7 @@
 
 #define MAX_SIZE 1024
 #define SERVER_PORT 8080
+#define CLIENT_PORT 9090
 #define FILE_DIRECTORY "fichiers/"
 
 void signal_handler(int signal) {
@@ -45,10 +46,10 @@ int main() {
                     return 1;
                 }
 
-                fprintf(file, "%s", message);
+                //fprintf(file, "%s", message);
                 fclose(file);
 
-                printf("Fichier %s reçu et enregistré.\n", filename);
+                printf("Fichier %s reçu et enregistré.\n", full_path);
 
             }  else if (strncmp(message, "LIST", 4) == 0) {
                 DIR *directory = opendir(FILE_DIRECTORY);
@@ -61,7 +62,9 @@ int main() {
                 }
 
                 closedir(directory);
-                sndmsg(file_list, SERVER_PORT);
+                printf(file_list);
+
+                sndmsg(file_list, CLIENT_PORT);
 
             } else if (strncmp(message, "DOWN ", 5) == 0) {
                 char *filename = message + 5;
