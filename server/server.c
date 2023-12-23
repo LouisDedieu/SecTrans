@@ -68,7 +68,10 @@ int main() {
 
             } else if (strncmp(message, "DOWN ", 5) == 0) {
                 char *filename = message + 5;
-                FILE *file = fopen(strcat(FILE_DIRECTORY, filename), "r");
+                char full_path[1024]; // Adjust size as needed
+                snprintf(full_path, sizeof(full_path), "%s%s", FILE_DIRECTORY, filename);
+
+                FILE *file = fopen(full_path, "r");
                 if (file == NULL) {
                     printf("Erreur: Impossible d'ouvrir le fichier.\n");
                     return 1;
@@ -79,10 +82,15 @@ int main() {
                 rewind(file);
 
                 char *file_contents = (char *)malloc(file_size + 1);
-                fread(file_contents, file_size, 1, file);
-                file_contents[file_size] = '\0';
+                if (file_contents == NULL) {
+                    printf("Erreur: Impossible d'allouer de la mémoire.\n");
+                    fclose(file);
+                    return 1;
+                }
 
-                sndmsg(file_contents, SERVER_PORT);
+                fread(file_contents, file_size, 2, file);
+                file_contents[file_size] = '\0';
+                sndmsg(file_contents, CLIENT_PORT);
                 free(file_contents);
                 fclose(file);
 

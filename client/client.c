@@ -79,11 +79,14 @@ int main(int argc, char *argv[]) {
 
     } else if (strcmp(argv[1], "-down") == 0 && argc == 3) {
 
+        char file_path[1024];
         snprintf(buffer, sizeof(buffer), "DOWN %s", argv[2]);
         sndmsg(buffer, SERVER_PORT);
+        startserver(CLIENT_SERVER_PORT);
         getmsg(buffer);
 
-        FILE *file = fopen(strcat(FILE_DIRECTORY, argv[2]), "w");
+        snprintf(file_path, sizeof(file_path), "%s%s", FILE_DIRECTORY, argv[2]);
+        FILE *file = fopen(file_path, "w");
         if (file == NULL) {
             printf("Erreur: Impossible de créer le fichier.\n");
             return 1;
@@ -93,7 +96,6 @@ int main(int argc, char *argv[]) {
         fclose(file);
 
         printf("Contenu du fichier %s récupéré.\n", argv[2]);
-
     } else {
 
         printf("Commande inconnue ou nombre d'arguments incorrect.\n");
