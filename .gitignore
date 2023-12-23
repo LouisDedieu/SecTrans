@@ -1,0 +1,10 @@
+# Fichiers de configuration de l'espace de travail VSCode
+.vscode/
+
+# Autres fichiers et dossiers courants à ignorer
+.DS_Store       # Fichiers spécifiques à macOS
+node_modules/   # Dépendances Node.js
+/dist           # Dossiers de build
+*.log           # Fichiers log
+*.tmp           # Fichiers temporaires
+*.tmp.*         # Autres formats de fichiers temporaires
