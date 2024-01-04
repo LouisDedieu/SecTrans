@@ -44,7 +44,7 @@ int main() {
                     printf("Erreur: Format de message incorrect.\n");
                     continue;
                 }
-                
+
                 char full_path[MAX_SIZE];
                 snprintf(full_path, sizeof(full_path), "%s%s", FILE_DIRECTORY, filename);
     
@@ -95,7 +95,6 @@ int main() {
 
                 printf("Fichier %s reçu et enregistré.\n", full_path);
             }
-        }
         else if (strncmp(message, "LIST", 4) == 0) {
                 DIR *directory = opendir(FILE_DIRECTORY);
                 struct dirent *entry;
@@ -113,39 +112,54 @@ int main() {
 
         }
         else if (strncmp(message, "DOWN ", 5) == 0) {
-                char *filename = message + 5;
-                char full_path[1024]; // Adjust size as needed
-                snprintf(full_path, sizeof(full_path), "%s%s", FILE_DIRECTORY, filename);
+            char *filename = message + 5;
+            char full_path[1024];
+            snprintf(full_path, sizeof(full_path), "%s%s", FILE_DIRECTORY, filename);
 
-                FILE *file = fopen(full_path, "r");
-                if (file == NULL) {
-                    printf("Erreur: Impossible d'ouvrir le fichier.\n");
-                    return 1;
-                }
-
-                fseek(file, 0, SEEK_END);
-                long file_size = ftell(file);
-                rewind(file);
-
-                char *file_contents = (char *)malloc(file_size + 1);
-                if (file_contents == NULL) {
-                    printf("Erreur: Impossible d'allouer de la mémoire.\n");
-                    fclose(file);
-                    return 1;
-                }
-
-                fread(file_contents, file_size, 2, file);
-                file_contents[file_size] = '\0';
-                sndmsg(file_contents, CLIENT_PORT);
-                free(file_contents);
-                fclose(file);
-
-                printf("Contenu du fichier %s envoyé.\n", filename);
+            FILE *file = fopen(full_path, "rb");
+            if (file == NULL) {
+                printf("Erreur: Impossible d'ouvrir le fichier.\n");
+                return 1;
             }
+
+            fseek(file, 0, SEEK_END);
+            long file_size = ftell(file);
+            rewind(file);
+
+            char *file_contents = (char *)malloc(file_size);
+            if (file_contents == NULL) {
+                printf("Erreur: Impossible d'allouer de la mémoire.\n");
+                fclose(file);
+                return 1;
+            }
+
+            fread(file_contents, 1, file_size, file);
+            fclose(file);
+
+            size_t encoded_size;
+            char *encoded_data = base64_encode(file_contents, file_size, &encoded_size);
+            free(file_contents);
+
+            if (encoded_data == NULL) {
+                printf("Erreur d'encodage.\n");
+                return 1;
+            }
+
+            for (size_t i = 0; i < encoded_size; i += 1024) {
+                size_t chunk_size = (i + 1024 > encoded_size) ? encoded_size - i : 1024;
+                char chunk[1024] = {0};
+                memcpy(chunk, encoded_data + i, chunk_size);
+                sndmsg(chunk, CLIENT_PORT);
+            }
+
+            sndmsg(END_OF_TRANSMISSION, CLIENT_PORT);
+            free(encoded_data);
+            printf("Contenu du fichier %s envoyé.\n", filename);
+        }
 
             empty_buffer(message);
         }
-    
+    }
 
     stopserver();
     return 0;

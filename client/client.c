@@ -5,6 +5,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <signal.h>
+#include <stdbool.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
@@ -90,22 +91,52 @@ int main(int argc, char *argv[]) {
         stopserver();
 
     } else if (strcmp(argv[1], "-down") == 0 && argc == 3) {
-
-        char file_path[1024];
         snprintf(buffer, sizeof(buffer), "DOWN %s", argv[2]);
         sndmsg(buffer, SERVER_PORT);
         startserver(CLIENT_SERVER_PORT);
-        getmsg(buffer);
 
-        snprintf(file_path, sizeof(file_path), "%s%s", FILE_DIRECTORY, argv[2]);
-        FILE *file = fopen(file_path, "w");
-        if (file == NULL) {
-            printf("Erreur: Impossible de créer le fichier.\n");
+        char *encoded_data = malloc(MAX_SIZE * 1024); // Taille suffisante pour les données encodées
+        if (encoded_data == NULL) {
+            printf("Erreur: Mémoire insuffisante.\n");
             return 1;
         }
 
-        fprintf(file, "%s", buffer);
+        size_t total_received = 0;
+        int received_size;
+        bool end_of_transmission_received = false;
+
+        while (!end_of_transmission_received) {
+            getmsg(buffer);
+            received_size = strlen(buffer);
+            if (strncmp(buffer, END_OF_TRANSMISSION, received_size) == 0) {
+                end_of_transmission_received = true;
+            } else {
+                memcpy(encoded_data + total_received, buffer, received_size);
+                total_received += received_size;
+            }
+        }
+
+        size_t decoded_size;
+        unsigned char *decoded_data = base64_decode(encoded_data, total_received, &decoded_size);
+        free(encoded_data);
+
+        if (decoded_data == NULL) {
+            printf("Erreur: Échec du décodage Base64.\n");
+            return 1;
+        }
+
+        char file_path[1024];
+        snprintf(file_path, sizeof(file_path), "%s%s", FILE_DIRECTORY, argv[2]);
+        FILE *file = fopen(file_path, "wb");
+        if (file == NULL) {
+            printf("Erreur: Impossible de créer le fichier.\n");
+            free(decoded_data);
+            return 1;
+        }
+
+        fwrite(decoded_data, 1, decoded_size, file);
         fclose(file);
+        free(decoded_data);
 
         printf("Contenu du fichier %s récupéré.\n", argv[2]);
     } else {
