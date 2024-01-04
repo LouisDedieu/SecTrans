@@ -1,5 +1,6 @@
 #include "../libs/client.h"
 #include "../libs/server.h"
+#include "../libs/base64.h"
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -13,6 +14,7 @@
 #define MAX_SIZE 1024
 #define SERVER_PORT 8080
 #define FILE_DIRECTORY "fichiers/"
+#define END_OF_TRANSMISSION "END_OF_TRANSMISSION"
 
 void client_signal_handler(int signal) {
     if (signal == SIGINT) {
@@ -32,43 +34,53 @@ int main(int argc, char *argv[]) {
     }
 
     if (strcmp(argv[1], "-up") == 0 && argc == 3) {
-        FILE *file = fopen(argv[2], "r");
+        FILE *file = fopen(argv[2], "rb");
         if (file == NULL) {
             printf("Erreur: Impossible d'ouvrir le fichier.\n");
             return 1;
         }
 
+        // Lire le fichier
         fseek(file, 0, SEEK_END);
         long file_size = ftell(file);
         rewind(file);
-
-        char *file_contents = (char *)malloc(file_size + 1);
-        fread(file_contents, file_size, 1, file);
-        file_contents[file_size] = '\0';
-
-        char *filename;
-
-        // Recherche du dernier '/' dans la chaîne.
-        filename = strrchr(argv[2], '/');
-
-        // Si un '/' est trouvé, avancer le pointeur pour ignorer le '/'.
-        if (filename != NULL) {
-            filename++;  // Passer au caractère suivant le '/'
-        } else {
-            // Si aucun '/' n'est trouvé, toute la chaîne est le nom du fichier.
-            filename = argv[2];
-        }
-
-        snprintf(buffer, sizeof(buffer), "UP %s", filename);
-        sndmsg(buffer, SERVER_PORT);
-        sndmsg(file_contents, SERVER_PORT);
-
-        printf("Fichier %s envoyé au serveur.\n", filename);
-
-        free(file_contents);
+        unsigned char *file_contents = (unsigned char *)malloc(file_size);
+        fread(file_contents, 1, file_size, file);
         fclose(file);
 
-    } else if (strcmp(argv[1], "-list") == 0 && argc == 2) {
+        // Encoder en Base64
+        size_t encoded_size;
+        char *encoded_data = base64_encode(file_contents, file_size, &encoded_size);
+        free(file_contents);
+
+        if (encoded_data == NULL) {
+            printf("Erreur d'encodage.\n");
+            return 1;
+        }
+
+        // Préparer l'envoi des données
+        char *filename = strrchr(argv[2], '/');
+        filename = (filename != NULL) ? filename + 1 : argv[2];
+
+        // Envoyer le nom du fichier et la taille encodée
+        snprintf(buffer, sizeof(buffer), "UP %s %ld", filename, encoded_size);
+        sndmsg(buffer, SERVER_PORT);
+
+        for (size_t i = 0; i < encoded_size; i += 1024) {
+            size_t chunk_size = (i + 1024 > encoded_size) ? encoded_size - i : 1024;
+            char chunk[1024] = {0};
+            memcpy(chunk, encoded_data + i, chunk_size);
+            sndmsg(chunk, SERVER_PORT);
+        }
+
+        sndmsg(END_OF_TRANSMISSION, SERVER_PORT);
+
+        // Nettoyage
+        free(encoded_data);
+
+        printf("Fichier %s envoyé.\n", filename);
+    }
+    else if (strcmp(argv[1], "-list") == 0 && argc == 2) {
 
         strcpy(buffer, "LIST");
         sndmsg(buffer, SERVER_PORT);
