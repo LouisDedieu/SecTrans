@@ -1,6 +1,6 @@
 CC=gcc
 LIB_DIR = ./libs
-CFLAGS=-Wl,-rpath='../libs'
+CFLAGS=-I$(LIB_DIR) -Wl,-rpath='../libs'
 OPEN_SSL_PATH = ./libs/openssl-3.2.0
 
 all: client_bin server_bin
