@@ -15,7 +15,7 @@
 #define MAX_SIZE 1024
 #define SERVER_PORT 8080
 #define CLIENT_PORT 9090
-#define FILE_DIRECTORY "fichiers/"
+#define FILE_DIRECTORY "server/fichiers/"
 #define END_OF_TRANSMISSION "END_OF_TRANSMISSION"
 
 // Structure User pour stocker le username et la password haché du client
@@ -296,7 +296,9 @@ int main() {
                         if (strncmp(message, "LOGIN ", 6) == 0) {
                             char *credentials = message + 6;
                             char *username = strtok(credentials, " ");
+                            printf("Username : %s\n", username);
                             char *password = strtok(NULL, " ");
+                            printf("Password : %s\n", password);
 
                             if (connectUser(username, password)) {
                                 isAuthenticated = true;

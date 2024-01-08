@@ -11,6 +11,6 @@ providers = providers
 p_test_configured = p_test_configured
 
 [p_test_configured]
-module = p_test.dylib
+module = p_test.so
 activate = 1
 greeting = Hello OpenSSL, greetings from Test Provider

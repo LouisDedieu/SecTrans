@@ -15,7 +15,7 @@
 
 #define MAX_SIZE 1024
 #define SERVER_PORT 8080
-#define FILE_DIRECTORY "fichiers/"
+#define FILE_DIRECTORY "client/fichiers/"
 #define END_OF_TRANSMISSION "END_OF_TRANSMISSION"
 
 void client_signal_handler(int signal) {
@@ -93,7 +93,7 @@ int main(int argc, char *argv[]) {
             sndmsg(buffer, SERVER_PORT);
             printf("Vous vous êtes déconnecté avec succès\n");
 
-        } else if (strcmp(argv[1], "-up") == 0 && argc == 3) {
+        } if (strcmp(argv[1], "-up") == 0 && argc == 3) {
             FILE *file = fopen(argv[2], "rb");
             if (file == NULL) {
                 printf("Erreur: Impossible d'ouvrir le fichier.\n");
