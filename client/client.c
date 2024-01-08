@@ -93,7 +93,7 @@ int main(int argc, char *argv[]) {
             sndmsg(buffer, SERVER_PORT);
             printf("Vous vous êtes déconnecté avec succès\n");
 
-        } if (strcmp(argv[1], "-up") == 0 && argc == 3) {
+        } else if (strcmp(argv[1], "-up") == 0 && argc == 3) {
             FILE *file = fopen(argv[2], "rb");
             if (file == NULL) {
                 printf("Erreur: Impossible d'ouvrir le fichier.\n");

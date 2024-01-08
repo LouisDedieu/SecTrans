@@ -296,9 +296,7 @@ int main() {
                         if (strncmp(message, "LOGIN ", 6) == 0) {
                             char *credentials = message + 6;
                             char *username = strtok(credentials, " ");
-                            printf("Username : %s\n", username);
                             char *password = strtok(NULL, " ");
-                            printf("Password : %s\n", password);
 
                             if (connectUser(username, password)) {
                                 isAuthenticated = true;

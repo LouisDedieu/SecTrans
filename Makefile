@@ -5,10 +5,10 @@ OPEN_SSL_PATH = ./libs/openssl-3.2.0
 
 all: client_bin server_bin
 
-client_bin: client/client.c
+client_bin: client/client.o base64.o
 	$(CC) -o client/client client/client.o base64.o -L$(LIB_DIR)  -lclient -lserver $(CFLAGS)
 
-server_bin: server/server.c
+server_bin: server/server.o base64.o
 	$(CC) -o server/server server/server.o base64.o -I$(OPEN_SSL_PATH)/include -L$(LIB_DIR) -lclient -lserver -L$(OPEN_SSL_PATH) -lcrypto $(CFLAGS)
 
 client/client.o: client/client.c
