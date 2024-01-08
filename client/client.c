@@ -33,8 +33,12 @@ bool login(char* username, char* password, char* buffer) {
     stopserver();
     if(strcmp(buffer, "SUCCES") == 0) {
         return true;
+    } else if(strcmp(buffer, "FAILURE") == 0) {
+        return false;
+    } else {
+        printf("Erreur de réponse du serveur lors de la tentative de connexion\n");
+        return false;
     }
-    return false;
 }
 
 int main(int argc, char *argv[]) {
@@ -75,7 +79,7 @@ int main(int argc, char *argv[]) {
             sndmsg(buffer, SERVER_PORT);
         }
         
-    } else {
+    } else if (strcmp(buffer, "LOGGED") == 0) {
 
         if (strcmp(argv[1], "-login") == 0 && argc == 2) {
             printf("Vous êtes déjà connecté à l'application. Vous pouvez utiliser les commandes -up <file> | -list | -down <file> ou -logout pour vous déconnecter\n");
@@ -198,6 +202,9 @@ int main(int argc, char *argv[]) {
             return 1;
             
         }
+    } else {
+        printf("Erreur de réponse du serveur pour savoir si vous êtes connecté ou non\n");
+        return 1;
     }
 
     stopserver();

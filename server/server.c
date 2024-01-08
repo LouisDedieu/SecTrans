@@ -134,14 +134,9 @@ void empty_buffer(char buffer[]) {
 }
 
 void initServer() {
-    printf("Identifiants de connexion disponibles :\n");
-    printf("Identifiant : Julien | Mot de passe : Softsec\n");
     registerUser("Julien", "Softsec");
-    printf("Identifiant : Louis | Mot de passe : Paperstudy\n");
     registerUser("Louis", "Paperstudy");
-    printf("Identifiant : Lucie | Mot de passe : Fuzzing\n");
     registerUser("Lucie", "Fuzzing");
-    printf("\n");
 }
 
 bool isAuthenticated = false;
